@@ -21,10 +21,19 @@ def constellation_planet(update, context):
     planet = user_text_list[1].title()
     ephem_body = getattr(ephem, planet, 'Error')
     if ephem_body != 'Error':
-        update.message.reply_text(f"{planet} сегодня находится в созвездии"
-         "{ephem.constellation(ephem_body(date.today()))}")
+        update.message.reply_text(f"{planet} сегодня находится в созвездии {ephem.constellation(ephem_body(date.today()))}")
     else:
-        update.message.reply_text('Введена неизвестная планета')
+        update.message.reply_text("Введена неизвестная планета")
+
+# isinstance(user_text, str)
+def get_word_count(update, context):
+    text = 'Вызван /wordcount'
+    print(text)
+    user_text_list = update.message.text.split()
+    len_str = len(user_text_list) - 1
+    print(len_str)
+    if len_str > 1:
+        update.message.reply_text(f"Количество слов в предложении - {len_str}")
 
 
 def talk_to_me(update, context):
@@ -39,6 +48,7 @@ def main():
     dp = mybot.dispatcher
     dp.add_handler(CommandHandler("start", greet_user))
     dp.add_handler(CommandHandler("planet", constellation_planet))
+    dp.add_handler(CommandHandler("wordcount", get_word_count))
     dp.add_handler(MessageHandler(Filters.text, talk_to_me))
 
     logging.info("Бот стартовал")
