@@ -33,7 +33,7 @@ def get_word_count(update, context):
     user_text_list = update.message.text.split()
     len_str = len(user_text_list) - 1
     print(len_str)
-    if len_str > 1:
+    if len_str >= 1:
         update.message.reply_text(f"Количество слов "\
         f"в предложении - {len_str}")
 
