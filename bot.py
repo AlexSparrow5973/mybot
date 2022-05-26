@@ -26,7 +26,7 @@ def constellation_planet(update, context):
     else:
         update.message.reply_text("Введена неизвестная планета")
 
-# isinstance(user_text, str)
+
 def get_word_count(update, context):
     text = 'Вызван /wordcount'
     print(text)
@@ -47,6 +47,13 @@ def get_word_count(update, context):
         update.message.reply_text("Введите /wordcount 'текст'")
 
 
+def next_full_moon(update, context):
+    text = 'Вызван /nextfullmoon'
+    print(text)
+    update.message.reply_text(f"Ближайшее полнолуние - "\
+        f"{ephem.next_full_moon(date.today())}")
+
+
 def talk_to_me(update, context):
     user_text = update.message.text
     print(user_text)
@@ -55,14 +62,13 @@ def talk_to_me(update, context):
 
 def main():
     mybot = Updater(settings.API_KEY, use_context=True)
-
     dp = mybot.dispatcher
     dp.add_handler(CommandHandler("start", greet_user))
     dp.add_handler(CommandHandler("planet", constellation_planet))
+    dp.add_handler(CommandHandler("nextfullmoon", next_full_moon))
     dp.add_handler(CommandHandler("wordcount", get_word_count))
     dp.add_handler(MessageHandler(Filters.text, talk_to_me))
-
-    logging.info("Бот стартовал")
+    logging.info("Bot is start")
     mybot.start_polling()
     mybot.idle()
 
