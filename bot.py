@@ -30,12 +30,21 @@ def constellation_planet(update, context):
 def get_word_count(update, context):
     text = 'Вызван /wordcount'
     print(text)
-    user_text_list = update.message.text.split()
-    len_str = len(user_text_list) - 1
-    print(len_str)
-    if len_str > 1:
+    word_list = update.message.text.split()
+    wordcount = 0
+    for word in word_list[1:]:
+        if isinstance(word, str) and word != '-':
+            wordcount += 1
+            try:
+                if isinstance(int(word), int):
+                    wordcount -= 1
+            except ValueError:
+                print("ValueError")
+    if wordcount >= 1:
         update.message.reply_text(f"Количество слов "\
-        f"в предложении - {len_str}")
+        f"в предложении - {wordcount}")
+    else:
+        update.message.reply_text("Введите /wordcount 'текст'")
 
 
 def talk_to_me(update, context):
