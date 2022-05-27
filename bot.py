@@ -22,14 +22,16 @@ def game_cities(update, context):
     cities_copy = cities_list[:]
     user_text_list = update.message.text.split()
     city = user_text_list[1].title()
-    if city in cities_copy:
-        cities_copy.remove(city)
-        for index in range(len(cities_copy)):
-            if city[-1] == cities_copy[index][0]:
-                update.message.reply_text(f"{cities_copy[index]}")
-                cities_copy.remove(cities_copy[index])
-            else:
-                update.message.reply_text("Я сдаюсь")
+    for index in range(len(cities_copy)):
+        if city in cities_copy:
+            cities_copy.remove(city)
+        if city[-1].upper() == cities_copy[index][0]:
+            update.message.reply_text(f"{cities_copy[index]}, ваш ход")
+            cities_copy.remove(cities_copy[index])
+            # city = update.message.text.upper()
+            break
+        else:
+            update.message.reply_text("Я сдаюсь")
 
 
 def constellation_planet(update, context):
