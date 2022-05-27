@@ -14,6 +14,24 @@ def greet_user(update, context):
     update.message.reply_text('Привет, пользователь! Ты вызвал команду /start')
 
 
+def game_cities(update, context):
+    text = 'Вызван /cities'
+    print(text)
+    cities_list = ['Москва', 'Архангельск', 'Калуга', 'Армавир',
+    'Рязань', 'Нижний-Новгород'] #как работать с большими списками?
+    cities_copy = cities_list[:]
+    user_text_list = update.message.text.split()
+    city = user_text_list[1].title()
+    if city in cities_copy:
+        cities_copy.remove(city)
+        for index in range(len(cities_copy)):
+            if city[-1] == cities_copy[index][0]:
+                update.message.reply_text(f"{cities_copy[index]}")
+                cities_copy.remove(cities_copy[index])
+            else:
+                update.message.reply_text("Я сдаюсь")
+
+
 def constellation_planet(update, context):
     text = 'Вызван /planet'
     print(text)
@@ -26,16 +44,32 @@ def constellation_planet(update, context):
     else:
         update.message.reply_text("Введена неизвестная планета")
 
-# isinstance(user_text, str)
+
 def get_word_count(update, context):
     text = 'Вызван /wordcount'
     print(text)
-    user_text_list = update.message.text.split()
-    len_str = len(user_text_list) - 1
-    print(len_str)
-    if len_str >= 1:
+    word_list = update.message.text.split()
+    wordcount = 0
+    for word in word_list[1:]:
+        if isinstance(word, str) and word != '-':
+            wordcount += 1
+            try:
+                if isinstance(int(word), int):
+                    wordcount -= 1
+            except ValueError:
+                print("ValueError")
+    if wordcount >= 1:
         update.message.reply_text(f"Количество слов "\
-        f"в предложении - {len_str}")
+        f"в предложении - {wordcount}")
+    else:
+        update.message.reply_text("Введите /wordcount 'текст'")
+
+
+def next_full_moon(update, context):
+    text = 'Вызван /nextfullmoon'
+    print(text)
+    update.message.reply_text(f"Ближайшее полнолуние - "\
+        f"{ephem.next_full_moon(date.today())}")
 
 
 def talk_to_me(update, context):
@@ -46,14 +80,14 @@ def talk_to_me(update, context):
 
 def main():
     mybot = Updater(settings.API_KEY, use_context=True)
-
     dp = mybot.dispatcher
     dp.add_handler(CommandHandler("start", greet_user))
+    dp.add_handler(CommandHandler("cities", game_cities))
     dp.add_handler(CommandHandler("planet", constellation_planet))
+    dp.add_handler(CommandHandler("nextfullmoon", next_full_moon))
     dp.add_handler(CommandHandler("wordcount", get_word_count))
     dp.add_handler(MessageHandler(Filters.text, talk_to_me))
-
-    logging.info("Бот стартовал")
+    logging.info("Bot is start")
     mybot.start_polling()
     mybot.idle()
 
