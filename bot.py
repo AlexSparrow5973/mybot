@@ -5,7 +5,7 @@ from emoji import emojize
 from glob import glob
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 from random import choice, randint
-from telegram import ReplyKeyboardMarkup
+from telegram import ReplyKeyboardMarkup, KeyboardButton
 import ephem, logging, settings
 
 logging.basicConfig(format='%(name)s - %(levelname)s - %(message)s',
@@ -30,7 +30,7 @@ def greet_user(update, context):
     my_keyboard = ReplyKeyboardMarkup([['Прислать котика']])
     update.message.reply_text(
         f"Здравствуй, пользователь {context.user_data['emoji']}!",
-        reply_markup=my_keyboard
+        reply_markup = main_keyboard()
     )
 
 
@@ -39,7 +39,8 @@ def talk_to_me(update, context):
     username = update.effective_user.first_name
     text = update.message.text
     update.message.reply_text(
-        f"Здравствуй, {username} {context.user_data['emoji']}! Ты написал: {text}"
+        f"Здравствуй, {username} {context.user_data['emoji']}! Ты написал: {text}",
+        reply_markup = main_keyboard()
     )
 
 
@@ -70,9 +71,13 @@ def constellation_planet(update, context):
     ephem_body = getattr(ephem, planet, 'Error')
     if ephem_body != 'Error':
         update.message.reply_text(f"{planet} сегодня находится в созвездии "\
-        f"{ephem.constellation(ephem_body(date.today()))}")
+        f"{ephem.constellation(ephem_body(date.today()))}",
+        reply_markup = main_keyboard()
+        )
     else:
-        update.message.reply_text("Введена неизвестная планета")
+        update.message.reply_text("Введена неизвестная планета",
+        reply_markup = main_keyboard()
+        )
 
 
 def get_word_count(update, context):
@@ -90,16 +95,22 @@ def get_word_count(update, context):
                 print("ValueError")
     if wordcount >= 1:
         update.message.reply_text(f"Количество слов "\
-        f"в предложении - {wordcount}")
+        f"в предложении - {wordcount}",
+        reply_markup = main_keyboard()
+        )
     else:
-        update.message.reply_text("Введите /wordcount 'текст'")
+        update.message.reply_text("Введите /wordcount 'текст'",
+        reply_markup = main_keyboard()
+        )
 
 
 def next_full_moon(update, context):
     text = 'Вызван /nextfullmoon'
     print(text)
     update.message.reply_text(f"Ближайшее полнолуние - "\
-        f"{ephem.next_full_moon(date.today())}")
+        f"{ephem.next_full_moon(date.today())}",
+        reply_markup = main_keyboard()
+        )
 
 
 def play_random_numbers(user_number):
@@ -124,7 +135,7 @@ def guess_number(update, context):
             message = "Введите целое число"
     else:
         message = "Введите целое число"
-    update.message.reply_text(message)
+    update.message.reply_text(message, reply_markup = main_keyboard())
 
 
 def send_cat_picture(update, context):
@@ -132,6 +143,21 @@ def send_cat_picture(update, context):
     cat_pic_filename = choice(cat_photos_list)
     chat_id = update.effective_chat.id
     context.bot.send_photo(chat_id=chat_id, photo=open(cat_pic_filename, 'rb'))
+
+
+def user_coordinates(update, context):
+    context.user_data['emoji'] = get_smile(context.user_data)
+    coords = update.message.location
+    update.message.reply_text(
+        f"Ваши координаты {coords} {context.user_data['emoji']}!",
+        reply_markup=main_keyboard()
+    )
+
+
+def main_keyboard():
+    return ReplyKeyboardMarkup([
+        ['Прислать котика', KeyboardButton('Мои координаты', request_location=True)]
+    ])
 
 
 def main():
@@ -145,6 +171,7 @@ def main():
     dp.add_handler(CommandHandler("wordcount", get_word_count))
     dp.add_handler(CommandHandler("guess", guess_number))
     dp.add_handler(CommandHandler("cat", send_cat_picture))
+    dp.add_handler(MessageHandler(Filters.location, user_coordinates))
     dp.add_handler(MessageHandler(Filters.regex('^(Прислать котика)$'), send_cat_picture))
     dp.add_handler(MessageHandler(Filters.text, talk_to_me))
 
