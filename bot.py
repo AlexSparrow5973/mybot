@@ -5,6 +5,7 @@ from emoji import emojize
 from glob import glob
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 from random import choice, randint
+from telegram import ReplyKeyboardMarkup
 import ephem, logging, settings
 
 logging.basicConfig(format='%(name)s - %(levelname)s - %(message)s',
@@ -14,24 +15,32 @@ logging.basicConfig(format='%(name)s - %(levelname)s - %(message)s',
 cities_list = ['Москва', 'Архангельск', 'Калуга', 'Армавир', 
 'Рязань', 'Нижний-Новгород'] #как работать с большими списками?
 
-def get_smile():
-    smile = choice(settings.USER_EMOJI)
-    return emojize(smile, use_aliases=True)
+
+def get_smile(user_data):
+    if 'emoji' not in user_data:
+        smile = choice(settings.USER_EMOJI)
+        return emojize(smile, use_aliases=True)
+    return user_data['emoji']
 
 
 def greet_user(update, context):
     text = 'Вызван /start'
     print(text)
-    smile = get_smile()
-    update.message.reply_text(f"Здравствуй, пользователь {smile}!")
+    context.user_data['emoji'] = get_smile(context.user_data)
+    my_keyboard = ReplyKeyboardMarkup([['Прислать котика']])
+    update.message.reply_text(
+        f"Здравствуй, пользователь {context.user_data['emoji']}!",
+        reply_markup=my_keyboard
+    )
 
 
 def talk_to_me(update, context):
-    smile = get_smile()
+    context.user_data['emoji'] = get_smile(context.user_data)
     username = update.effective_user.first_name
     text = update.message.text
-    print(text)
-    update.message.reply_text(f"Здравствуй, {username} {smile}! Ты написал: {text}")
+    update.message.reply_text(
+        f"Здравствуй, {username} {context.user_data['emoji']}! Ты написал: {text}"
+    )
 
 
 """def game_cities(update, context):
@@ -136,6 +145,7 @@ def main():
     dp.add_handler(CommandHandler("wordcount", get_word_count))
     dp.add_handler(CommandHandler("guess", guess_number))
     dp.add_handler(CommandHandler("cat", send_cat_picture))
+    dp.add_handler(MessageHandler(Filters.regex('^(Прислать котика)$'), send_cat_picture))
     dp.add_handler(MessageHandler(Filters.text, talk_to_me))
 
     logging.info("Bot is start")
